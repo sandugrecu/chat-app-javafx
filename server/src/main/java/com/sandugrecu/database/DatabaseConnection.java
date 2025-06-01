@@ -1,6 +1,5 @@
 package com.sandugrecu.database;
 
-
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.sql.Connection;
@@ -13,28 +12,24 @@ import java.util.List;
 import java.util.Properties;
 
 public class DatabaseConnection {
-    private static String URL;// = "jdbc:sqlserver://localhost:1433;databaseName=chatApp;encrypt=true;trustServerCertificate=true;";
-    private static String USERNAME;// = "sandu";
-    private static String PASSWORD;// = "sandu123";
+    private static String URL;
+    private static String USERNAME;
+    private static String PASSWORD;
 
     static {
-        Properties props = new Properties();
-        try {
-            // Load from classpath
-            try (var input = DatabaseConnection.class.getClassLoader().getResourceAsStream("config.properties")) {
-                if (input == null) {
-                    throw new RuntimeException("config.properties not found in classpath");
-                }
-                props.load(input);
+        Properties databaseProperties = new Properties();
+        try (var input = DatabaseConnection.class.getClassLoader().getResourceAsStream("config.properties")) {
+            if (input == null) {
+                throw new RuntimeException("config.properties not found in classpath");
             }
+            databaseProperties.load(input);
         } catch (IOException e) {
-            e.printStackTrace();
             throw new RuntimeException("Could not load config file", e);
         }
 
-        URL = props.getProperty("db.url");
-        USERNAME = props.getProperty("db.username");
-        PASSWORD = props.getProperty("db.password");
+        URL = databaseProperties.getProperty("db.url");
+        USERNAME = databaseProperties.getProperty("db.username");
+        PASSWORD = databaseProperties.getProperty("db.password");
     }
 
     public static Connection getConnection() throws SQLException, ClassNotFoundException {
@@ -49,7 +44,7 @@ public class DatabaseConnection {
              PreparedStatement stmt = conn.prepareStatement(sql)) {
              
             stmt.setString(1, username);
-            stmt.setString(2, password); // Consider hashing passwords in real apps
+            stmt.setString(2, password); // Should hashs password before storing them in the database
 
             ResultSet rs = stmt.executeQuery();
             return rs.next(); // If a record exists, user is valid
@@ -65,7 +60,7 @@ public class DatabaseConnection {
         
         try (Connection conn = getConnection();
         		PreparedStatement checkStmt = conn.prepareStatement(checkSql)) {
-        		//verificam daca username-ul exista
+
         		checkStmt.setString(1, username);
         		ResultSet rs = checkStmt.executeQuery();
         		
@@ -118,12 +113,11 @@ public class DatabaseConnection {
     }
     
     public static boolean usernameExists(String username) {
-    	//primeste username-ul, verifica daca acesta exista in DB si returneaza true daca exista si false daca nu 
         String checkSql = "SELECT * FROM Users WHERE username = ?";
         
         try (Connection conn = getConnection();
         		PreparedStatement checkStmt = conn.prepareStatement(checkSql)) {
-        		//verificam daca username-ul exista
+
         		checkStmt.setString(1, username);
         		ResultSet rs = checkStmt.executeQuery();
         		
@@ -141,11 +135,11 @@ public class DatabaseConnection {
     
     public static String addContact(String user1, String user2) throws ClassNotFoundException {
         if (!usernameExists(user1)) {
-            return "ADD_CONTACT_FAIL:" + user1 + ":nu exista";
+            return "ADD_CONTACT_FAIL:" + user1 + ": does not exit";
         }
 
         if (!usernameExists(user2)) {
-            return "ADD_CONTACT_FAIL:" + user2 + ":nu exista";
+            return "ADD_CONTACT_FAIL:" + user2 + ": doe not exist";
         }
 
         int user1ID = getUserIdByUsername(user1);
@@ -160,7 +154,7 @@ public class DatabaseConnection {
             ResultSet rs = checkStmt.executeQuery();
 
             if (rs.next()) {
-                return "ADD_CONTACT_FAIL:" + user2 + ":deja adaugat";
+                return "ADD_CONTACT_FAIL:" + user2 + ": already added";
             }
 
             // Insert both directions
@@ -178,7 +172,7 @@ public class DatabaseConnection {
             
         } catch (SQLException e) {
             e.printStackTrace();
-            return "ADD_CONTACT_FAIL:eroare_SQL";
+            return "ADD_CONTACT_FAIL:SQL_Error";
         }
     }
 
@@ -221,7 +215,6 @@ public class DatabaseConnection {
         return contactIds;
     }
 
-    // Keep this method unchanged as you requested
     public static ArrayList<String> getContacts(String username) throws ClassNotFoundException {
         ArrayList<String> contactNames = new ArrayList<>();
         int userID = getUserIdByUsername(username);
@@ -235,53 +228,6 @@ public class DatabaseConnection {
         return contactNames;
     }
 
-    
-    /*
-    public static ArrayList<String> getContacts(String username) throws ClassNotFoundException {
-        ArrayList<String> contactNames = new ArrayList<>();
-        System.out.println("acest contact Names");
-
-        String getUserIdQuery = "SELECT UserID FROM Users WHERE username = ?";
-        String getContactIdsQuery = "SELECT ContactUserID FROM Contacts WHERE UserID = ?";
-        String getContactNameQuery = "SELECT username FROM Users WHERE UserID = ?";
-
-        try (Connection conn = getConnection();
-             PreparedStatement userIdStmt = conn.prepareStatement(getUserIdQuery)) {
-
-            userIdStmt.setString(1, username);
-            ResultSet rs = userIdStmt.executeQuery();
-
-            if (rs.next()) {
-                int userId = rs.getInt("UserID");
-
-                // Now get contact IDs
-                try (PreparedStatement contactsStmt = conn.prepareStatement(getContactIdsQuery)) {
-                    contactsStmt.setInt(1, userId);
-                    ResultSet contactsRs = contactsStmt.executeQuery();
-
-                    while (contactsRs.next()) {
-                        int contactId = contactsRs.getInt("ContactUserID");
-
-                        try (PreparedStatement nameStmt = conn.prepareStatement(getContactNameQuery)) {
-                            nameStmt.setInt(1, contactId);
-                            ResultSet nameRs = nameStmt.executeQuery();
-                            if (nameRs.next()) {
-                                contactNames.add(nameRs.getString("username"));
-                            }
-                        }
-                    }
-                }
-            }
-
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-
-        return contactNames;
-    }
-    */
-    
-    
     // Get username by user ID
     public static String getUserNameById(int userId) throws ClassNotFoundException {
         String userName = "";
@@ -329,7 +275,8 @@ public class DatabaseConnection {
             int userAID = getUserIdByUsername(userA);
             int userBID = getUserIdByUsername(userB);
 
-            stmt.setInt(1, userAID);            stmt.setInt(2, userBID);
+            stmt.setInt(1, userAID);
+            stmt.setInt(2, userBID);
             stmt.setInt(3, userBID);
             stmt.setInt(4, userAID);
 
@@ -340,27 +287,15 @@ public class DatabaseConnection {
 
                 // Convert senderID back to username
                 String senderUsername = getUserNameById(senderId);
-                
-                /*
-                if (senderUsername.equals(userA)) {
-                	messages.add("Me: " + messageContent);                	
-                }else {
-                	messages.add(senderUsername + ": " + messageContent);                	
-                }*/
-                
                 messages.add(senderUsername + ": " + messageContent);
-                	
             }
 
         } catch (SQLException e) {
             e.printStackTrace();
         }
-        //System.out.println("Messages: " + messages + " (DB)");
         return messages;
     }
 
-
-    
     public static void storeMessage(String fromUser, String toUser, String message) {
         String insertSql = "INSERT INTO Message (senderID, receiverID, message, date) VALUES (?, ?, ?, GETDATE())";
 
@@ -383,7 +318,7 @@ public class DatabaseConnection {
             if (rowsInserted > 0) {
                 System.out.println("[INFO] Message stored successfully. (DB)");
             } else {
-                System.out.println("[WARNING] Message not stored. (DB)");
+                System.out.println("[ERROR] Message not stored. (DB)");
             }
 
         } catch (Exception e) {
