@@ -82,10 +82,10 @@ public class ContactsController {
 
                     String response = clientSocket.readLine();
 
-                    if (response.startsWith("ADDCONTACT_SUCCESS")) {
+                    if (response.startsWith("ADD_CONTACT_SUCCESS")) {
                         new CustomAlert("Contact added successfully!");
                         loadContactsFromServer();
-                    } else if (response.startsWith("ADDCONTACT_FAIL")) {
+                    } else if (response.startsWith("ADD_CONTACT_FAIL")) {
                         String[] parts = response.split(":", 3);
                         String failedUser = parts.length > 1 ? parts[1] : "?";
                         String reason = parts.length > 2 ? parts[2] : "Unknown error";

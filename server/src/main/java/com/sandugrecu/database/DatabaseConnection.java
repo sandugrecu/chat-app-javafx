@@ -141,11 +141,11 @@ public class DatabaseConnection {
     
     public static String addContact(String user1, String user2) throws ClassNotFoundException {
         if (!usernameExists(user1)) {
-            return "ADDCONTACT_FAIL:" + user1 + ":nu exista";
+            return "ADD_CONTACT_FAIL:" + user1 + ":nu exista";
         }
 
         if (!usernameExists(user2)) {
-            return "ADDCONTACT_FAIL:" + user2 + ":nu exista";
+            return "ADD_CONTACT_FAIL:" + user2 + ":nu exista";
         }
 
         int user1ID = getUserIdByUsername(user1);
@@ -160,7 +160,7 @@ public class DatabaseConnection {
             ResultSet rs = checkStmt.executeQuery();
 
             if (rs.next()) {
-                return "ADDCONTACT_FAIL:" + user2 + ":deja adaugat";
+                return "ADD_CONTACT_FAIL:" + user2 + ":deja adaugat";
             }
 
             // Insert both directions
@@ -174,11 +174,11 @@ public class DatabaseConnection {
             insertStmt.setInt(1, user2ID);
             insertStmt.setInt(2, user1ID);
             insertStmt.executeUpdate();
-            return "ADDCONTACT_SUCCESS";
+            return "ADD_CONTACT_SUCCESS";
             
         } catch (SQLException e) {
             e.printStackTrace();
-            return "ADDCONTACT_FAIL:eroare_SQL";
+            return "ADD_CONTACT_FAIL:eroare_SQL";
         }
     }
 

@@ -1,6 +1,5 @@
 package com.sandugrecu.server;
 
-
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.IOException;
@@ -15,8 +14,6 @@ import java.util.Map;
 
 import com.sandugrecu.database.DatabaseConnection;
 
-import com.sandugrecu.database.DatabaseConnection;
-
 public class ClientHandler implements Runnable {
 	
 	public static ArrayList<ClientHandler> clientHandlers = new ArrayList<>();
@@ -27,11 +24,9 @@ public class ClientHandler implements Runnable {
 	private BufferedReader bufferedReader;
 	private BufferedWriter bufferedWriter;
 	private String clientUsername;
+
+    private String listeningChatKey = null;
 	
-	 private volatile boolean listeningForChat = false;
-	 private String listeningChatKey = null;
-	
-	//constructorul
 	public ClientHandler(Socket socket) {
 		try {
 			this.socket = socket;
@@ -39,8 +34,9 @@ public class ClientHandler implements Runnable {
 			this.bufferedReader = new BufferedReader(new InputStreamReader(socket.getInputStream()));
 			this.clientUsername = bufferedReader.readLine();
 			
-			System.out.println("[INFO] Client handler creat pentru: " + clientUsername + " (ClientHandler)\n");
-			//adaugam clientul in lista
+			System.out.println("[INFO] Client handler created for: " + clientUsername + " (ClientHandler)\n");
+
+			//adding the client to the clients list
 			clientHandlers.add(this);
 		}catch (IOException e) {
 			closeEverything(socket, bufferedReader, bufferedWriter);
@@ -53,16 +49,15 @@ public class ClientHandler implements Runnable {
 
 	    try {
 	        while ((clientRequest = bufferedReader.readLine()) != null) {
-	        	
-	        	//afisam la consola request-ul primit inafara de GET CHAT deoarece acesta ruleaza in fiecare secunda
+
+				//prints to the console every request received from the client
 	        	if (!clientRequest.startsWith("GET_CHAT")) {
 	        		System.out.println("[INFO] Received from client: " + clientRequest + " (ClientHandler)");	        		
 	        	}
 	            try {
 					handleRequest(clientRequest);
 				} catch (ClassNotFoundException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
+					System.err.println("[ERROR] Class not found: " + e.getMessage());
 				}
 	        }
 	    } catch (IOException e) {
@@ -79,8 +74,10 @@ public class ClientHandler implements Runnable {
 	        case "LOGIN":
 	            String[] loginData = parts[1].split(":");
 	            String loginUser = loginData[0];
-	            String loginPass = loginData[1];
-	            boolean isValid = DatabaseConnection.validateUser(loginUser, loginPass);
+	            String loginPassword = loginData[1];
+
+				//verifies if the login is valid
+	            boolean isValid = DatabaseConnection.validateUser(loginUser, loginPassword);
 	            if (isValid) {
 	                this.clientUsername = loginUser;
 	                sendMessage("LOGIN_SUCCESS");
@@ -95,15 +92,15 @@ public class ClientHandler implements Runnable {
 	            String regPass = regData[1];
 	            String repeatedPassword = regData[2];
 	            
-	            //verificam daca username-ul e valabil
+	            //verifies if the username is available
 	            if (!DatabaseConnection.isUsernameAvailable(regUser)) {
-	            	sendMessage("REGISTER_FAIL:Username-ul nu este disponibil!");
+	            	sendMessage("REGISTER_FAIL:Username is not available!");
 	            	break;
 	            }
 	            
-	            //daca parola repetata nu coincide 
+	            //verifies if both password entryes are the same
 	            if (!regPass.equals(repeatedPassword)) {
-	            	sendMessage("REGISTER_FAIL:Parolele nu coincid!");
+	            	sendMessage("REGISTER_FAIL:Passwords do NOT match!");
 	            	break;
 	            }
 	            
@@ -141,7 +138,7 @@ public class ClientHandler implements Runnable {
                                 listener.sendMessage(messagePayload);
                             } catch (IOException e) {
                                 // If client is disconnected, remove from listeners
-                                e.printStackTrace();
+                                e.printStackTrace(System.err);
                                 listener.stopListening();
                             }
                         }
@@ -152,7 +149,7 @@ public class ClientHandler implements Runnable {
 	        case "ADD_CONTACT":
 	            String[] addContactData = parts[1].split(":");
 	            if (addContactData.length != 2) {
-	                sendMessage("ADDCONTACT_FAIL:Invalid format");
+	                sendMessage("ADD_CONTACT_FAIL:Invalid format");
 	                break;
 	            }
 	            
@@ -161,7 +158,7 @@ public class ClientHandler implements Runnable {
 	            
 	            // Ensure both users are not the same
 	            if (user1.equals(user2)) {
-	                sendMessage("ADDCONTACT_FAIL:You cannot add yourself.");
+	                sendMessage("ADD_CONTACT_FAIL:You cannot add yourself.");
 	                break;
 	            }
 
@@ -201,7 +198,6 @@ public class ClientHandler implements Runnable {
 
                 listeningChatKey = getChatKey(userA1, userB2);
                 registerListener(listeningChatKey, this);
-                listeningForChat = true;
                 sendMessage("START_LISTEN_SUCCESS");
                 break;
                 
@@ -228,7 +224,7 @@ public class ClientHandler implements Runnable {
     // Register a client handler as listener for a chat
     private void registerListener(String chatKey, ClientHandler clientHandler) {
         synchronized (chatListeners) {
-            chatListeners.computeIfAbsent(chatKey, k -> new ArrayList<>());
+            chatListeners.computeIfAbsent(chatKey, _ -> new ArrayList<>());
             List<ClientHandler> listeners = chatListeners.get(chatKey);
             if (!listeners.contains(clientHandler)) {
                 listeners.add(clientHandler);
@@ -239,7 +235,6 @@ public class ClientHandler implements Runnable {
 
     // Remove the client from listening lists and clean up
     private void stopListening() {
-        listeningForChat = false;
         if (listeningChatKey != null) {
             synchronized (chatListeners) {
                 List<ClientHandler> listeners = chatListeners.get(listeningChatKey);
@@ -269,7 +264,7 @@ public class ClientHandler implements Runnable {
 				socket.close();
 			}
 		}catch (IOException e) {
-			e.printStackTrace();
+			e.printStackTrace(System.err);
 		}
 	}
 }
