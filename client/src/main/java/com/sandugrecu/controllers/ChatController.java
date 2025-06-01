@@ -1,6 +1,7 @@
 package com.sandugrecu.controllers;
 
 import java.io.IOException;
+import java.util.Objects;
 
 import com.sandugrecu.client.ClientSocket;
 import com.sandugrecu.client.Session;
@@ -42,19 +43,19 @@ public class ChatController {
             ClientSocket clientSocket = Session.getClientSocket();
             clientSocket.sendCommand("GET_CHAT:" + currentUser + ":" + contactName);
         } catch (IOException e) {
-            e.printStackTrace();
+            e.printStackTrace(System.err);
         }
 
         // Then start listening for new messages pushed by server
         startListeningForMessages();
         
-     // Add global key listener after scene is ready
+        // Add global key listener after scene is ready
         Platform.runLater(() -> {
             messageInput.getScene().setOnKeyPressed(event -> {
                 switch (event.getCode()) {
                     case SLASH -> {
                         messageInput.requestFocus();
-                        messageInput.selectAll();  // optional
+                        messageInput.selectAll();
                     }
                     case ESCAPE -> {
                     	this.backToContacts();
@@ -63,7 +64,6 @@ public class ChatController {
             });
         });
     }
-
 
     private void startListeningForMessages() {
         listening = true;
@@ -90,15 +90,11 @@ public class ChatController {
 
                             Platform.runLater(() -> addMessage(sender, content));
                         }
-                    } else if (line.equals("CHAT_DONE")) {
-                        // The server finished sending chat history
-                        // Optionally do something here if needed
                     }
-                    // Handle other server messages if needed
                 }
 
             } catch (IOException e) {
-                e.printStackTrace();
+                e.printStackTrace(System.err);
             }
         });
 
@@ -115,7 +111,7 @@ public class ChatController {
                 ClientSocket clientSocket = Session.getClientSocket();
                 clientSocket.sendCommand("SEND_MESSAGE:" + currentUser + ":" + contactName + ":" + message);
             } catch (IOException e) {
-                e.printStackTrace();
+                e.printStackTrace(System.err);
             }
         }
     }
@@ -125,6 +121,7 @@ public class ChatController {
         switch (event.getCode()) {
             case ENTER -> sendMessage();
         }
+
     }
 
     private void addMessage(String sender, String content) {
@@ -169,14 +166,14 @@ public class ChatController {
 			
 			Stage currentStage = (Stage) ((Node) event.getSource()).getScene().getWindow();
 			Scene scene = new Scene(root);
-            scene.getStylesheets().add(getClass().getResource("/css/styles.css").toExternalForm());
+            scene.getStylesheets().add(Objects.requireNonNull(getClass().getResource("/css/styles.css")).toExternalForm());
 			
 			currentStage.setScene(scene);
 			currentStage.setTitle("Contacts");
 			currentStage.show();
 			
 		} catch (IOException e) {
-			e.printStackTrace();
+			e.printStackTrace(System.err);
 		}
 	}
 	
@@ -192,14 +189,14 @@ public class ChatController {
 			
 	        Stage stage = (Stage) chatListView.getScene().getWindow();
 	        Scene scene = new Scene(root);
-            scene.getStylesheets().add(getClass().getResource("/css/styles.css").toExternalForm());
+            scene.getStylesheets().add(Objects.requireNonNull(getClass().getResource("/css/styles.css")).toExternalForm());
 			
 	        stage.setScene(scene);
 	        stage.setTitle("Contacts");
 	        stage.show();
 			
 		} catch (IOException e) {
-			e.printStackTrace();
+			e.printStackTrace(System.err);
 		}
 	}
 }

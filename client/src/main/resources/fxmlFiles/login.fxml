@@ -9,7 +9,7 @@
 <Pane fx:id="logInPane" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="600.0" prefWidth="400.0" xmlns="http://javafx.com/javafx/23.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.sandugrecu.controllers.LoginController">
    
    <children>
-      <Button styleClass="secundaryButton" layoutX="82.0" layoutY="314.0" mnemonicParsing="false" onAction="#createAcount" text="Create account" />
+      <Button styleClass="secondaryButton" layoutX="82.0" layoutY="314.0" mnemonicParsing="false" onAction="#createAccount" text="Create account" />
       <Button styleClass="primaryButton" layoutX="271.0" layoutY="314.0" mnemonicParsing="false" onAction="#login" text="Log In" />
       <TextField fx:id="usernameField" layoutX="78.0" layoutY="225.0" onKeyPressed="#handleEnterKey" prefHeight="25.0" prefWidth="243.0" promptText="Enter username" />
       <PasswordField fx:id="passwordField" layoutX="78.0" layoutY="275.0" onKeyPressed="#handleEnterKey" prefHeight="25.0" prefWidth="243.0" promptText="Enter password" />

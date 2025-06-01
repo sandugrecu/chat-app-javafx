@@ -9,7 +9,6 @@ public class Session {
     public static void setClientSocket(ClientSocket socket) {
         clientSocket = socket;
     }
-
     public static void setCurrentUsername(String username) {
         currentUsername = username;
     }
@@ -18,19 +17,17 @@ public class Session {
     public static ClientSocket getClientSocket() {
         return clientSocket;
     }
-
     public static String getCurrentUsername() {
         return currentUsername;
     }
 
-    // Optional: Clean up session (e.g., on logout or exit)
     public static void clearSession() {
         try {
             if (clientSocket != null) {
                 clientSocket.close();
             }
         } catch (Exception e) {
-            e.printStackTrace();
+            e.printStackTrace(System.err);
         }
         clientSocket = null;
         currentUsername = null;

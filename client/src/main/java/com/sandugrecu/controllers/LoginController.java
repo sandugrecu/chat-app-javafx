@@ -2,7 +2,7 @@ package com.sandugrecu.controllers;
 
 import java.io.IOException;
 
-import java.util.Optional;
+import java.util.Objects;
 
 import com.sandugrecu.client.ClientSocket;
 import com.sandugrecu.client.Config;
@@ -15,46 +15,37 @@ import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
-import javafx.scene.control.Button;
 import javafx.scene.control.PasswordField;
 import javafx.scene.control.TextField;
-import javafx.scene.control.TextInputDialog;
 import javafx.stage.Stage;
 
-
 public class LoginController {
-
-	//facem legatura cu text field si password field prin fxid
     @FXML private TextField usernameField;
-    @FXML private PasswordField passwordField;   
-    
-	//private String serverIP = Config.getServerIP();
+    @FXML private PasswordField passwordField;
+
     private String serverIP;
-    
+
     public void login(ActionEvent event) {
         String username = usernameField.getText();
         String password = passwordField.getText();	
 
         try {
-        	//afisam un alert box si citim de la utilizator ip-ul serverului
         	new GetServerIPAlert();
-        	
-            // citim ip-ul serverului din Configurari
-        	serverIP = Config.getServerIP();
+            serverIP = Config.getServerIP();
         	
         	// Check if the IP is valid
             if (!isValidIP(serverIP)) {
-                new CustomAlert("IP-ul serverului nu este valid.");
+                new CustomAlert("Servers IP in not valid!");
                 return;
             }
             
             if (!isServerReachable(serverIP)) {
-                new CustomAlert("Serverul nu este accesibil.");
+                new CustomAlert("The server is not accessible.");
                 return;
             }
             
             ClientSocket clientSocket = new ClientSocket(serverIP, 12345);        	
-            System.out.println("[INFO] Socket conection succesfull. (LoginController)");
+            System.out.println("[INFO] Socket connection successful. (LoginController)");
             
             // Identify the client to the server
             clientSocket.sendUsername(username);
@@ -78,9 +69,8 @@ public class LoginController {
                 contactsController.setUsername(username);
 
                 Stage currentStage = (Stage) usernameField.getScene().getWindow();
-                //cream o scena nou si aplicam css
                 Scene scene = new Scene(root);
-                scene.getStylesheets().add(getClass().getResource("/css/styles.css").toExternalForm());
+                scene.getStylesheets().add(Objects.requireNonNull(getClass().getResource("/css/styles.css")).toExternalForm());
                 
                 currentStage.setScene(scene);
 
@@ -88,46 +78,38 @@ public class LoginController {
                 currentStage.show();
             } else {
                 System.out.println("Login Failed.");
-                
-                //TO IMPLEMENT
                 new CustomAlert("Login failed because...");
             }
 
-            //clientSocket.close(); // Close the socket connection
-
         } catch (IOException e) {
-            e.printStackTrace();
+            e.printStackTrace(System.err);
         }
     }
 
-    
     @FXML
-    public void createAcount(ActionEvent event) {
+    public void createAccount(ActionEvent event) {
     	try {
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxmlFiles/createAcount.fxml"));
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxmlFiles/createAccount.fxml"));
             Parent root = loader.load();
 
-            // Obține Stage-ul curent din eveniment
             Stage currentStage = (Stage) ((javafx.scene.Node) event.getSource()).getScene().getWindow();
             
-            // Schimbă scena
             Scene scene = new Scene(root);
-            scene.getStylesheets().add(getClass().getResource("/css/styles.css").toExternalForm());
+            scene.getStylesheets().add(Objects.requireNonNull(getClass().getResource("/css/styles.css")).toExternalForm());
 
             currentStage.setScene(scene);
             currentStage.setTitle("Create Account");
             currentStage.show();
         } catch (IOException e) {
-            e.printStackTrace();
+            e.printStackTrace(System.err);
         }
-    	
     }
     
     private boolean isValidIP(String ip) {
     	if (ip.equals("localhost"))
     		return true;
     	
-    	//regex pentru un ip valid
+    	//regex for a valid IP
         String regex = "^((25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\.){3}(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$";
         return ip.matches(regex);
     }
@@ -144,7 +126,7 @@ public class LoginController {
             // Return true if the server is reachable (exit value 0 means success)
             return returnVal == 0;
         } catch (IOException | InterruptedException e) {
-            e.printStackTrace();
+            e.printStackTrace(System.err);
             return false;
         }
     }
@@ -153,10 +135,6 @@ public class LoginController {
     public void initialize() {
         // Run after UI is ready to request focus
         Platform.runLater(() -> usernameField.requestFocus());
-        
-        //verificam daca gasesc fisierele
-        //System.out.println(getClass().getResource("/css/styles.css"));
-        //System.out.println(getClass().getResource("/fxmlFiles/login.fxml"));
     }
     
     @FXML

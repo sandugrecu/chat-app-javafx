@@ -7,12 +7,12 @@ import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
-import javafx.scene.control.Alert;
 import javafx.scene.control.PasswordField;
 import javafx.scene.control.TextField;
 import javafx.stage.Stage;
 
 import java.io.IOException;
+import java.util.Objects;
 
 import com.sandugrecu.client.ClientSocket;
 import com.sandugrecu.client.Config;
@@ -20,16 +20,14 @@ import com.sandugrecu.alertBoxes.CustomAlert;
 import com.sandugrecu.client.Session;
 
 public class CreateAcountController {
-	private String serverIP = Config.getServerIP();
+	private final String serverIP = Config.getServerIP();
 	
-	//facem legatura cu text field si password field prin fxid
     @FXML private TextField usernameField;
     @FXML private PasswordField passwordField;
     @FXML private PasswordField repeatedPasswordField;
     
     @FXML
-    public void createAcount(ActionEvent event) {
-    	// citim datele din createAcount.fxml
+    public void createAccount(ActionEvent event) {
 		String username = usernameField.getText();
 		String password = passwordField.getText();
 		String repeatedPassword = repeatedPasswordField.getText();
@@ -37,7 +35,7 @@ public class CreateAcountController {
 		try {
             // Create the socket connection
             ClientSocket clientSocket = new ClientSocket(serverIP, 12345);
-            System.out.println("[INFO] Socket conection succesfull. (CreateAcountController)");
+            System.out.println("[INFO] Socket connection successful. (CreateAccountController)");
             
             // Identify the client to the server
             clientSocket.sendUsername(username);
@@ -62,24 +60,22 @@ public class CreateAcountController {
 
                 Stage currentStage = (Stage) usernameField.getScene().getWindow();
                 Scene scene = new Scene(root);
-        		scene.getStylesheets().add(getClass().getResource("/css/styles.css").toExternalForm());
+        		scene.getStylesheets().add(Objects.requireNonNull(getClass().getResource("/css/styles.css")).toExternalForm());
                 
                 currentStage.setScene(scene);
                 currentStage.setTitle("Contacts");
                 currentStage.show();
             } else if (response.startsWith("REGISTER_FAIL")){
             	String[] parts = response.split(":", 2);
-            	//Citim mesajul erorii
-            	String errorMessage = (parts.length > 1) ? parts[1] : "A aparut o eroare necunoscuta la inregistrare!";
+            	//Reads the message
+            	String errorMessage = (parts.length > 1) ? parts[1] : "An unknown error has appeared during registration!";
             	
-            	//Creem o alerta care contine mesajul cu eroarea care s-a comis
+            	//Creates an alert error
                 new CustomAlert(errorMessage);
             }
 
-            //clientSocket.close(); // Close the socket connection
-
         } catch (IOException e) {
-            e.printStackTrace();
+            e.printStackTrace(System.err);
         }
     }
     
@@ -89,20 +85,17 @@ public class CreateAcountController {
     		FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxmlFiles/login.fxml"));
     		Parent root = loader.load();
 
-    		// Creează scena și adaugă CSS-ul
     		Scene scene = new Scene(root);
-    		scene.getStylesheets().add(getClass().getResource("/css/styles.css").toExternalForm());
+    		scene.getStylesheets().add(Objects.requireNonNull(getClass().getResource("/css/styles.css")).toExternalForm());
 
-    		// Obține Stage-ul curent din eveniment
     		Stage currentStage = (Stage) ((javafx.scene.Node) event.getSource()).getScene().getWindow();
 
-    		// Setează scena și afișează
     		currentStage.setScene(scene);
     		currentStage.setTitle("Login");
     		currentStage.show();
 
         } catch (IOException e) {
-            e.printStackTrace();
+            e.printStackTrace(System.err);
         }
     }
     

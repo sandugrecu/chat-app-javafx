@@ -1,11 +1,12 @@
 package com.sandugrecu.client;
 
-
 import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
 import javafx.scene.Parent;
+
+import java.util.Objects;
 
 public class Main extends Application {
     @Override
@@ -16,7 +17,7 @@ public class Main extends Application {
         Scene scene = new Scene(root);
 
         // Apply the CSS
-        scene.getStylesheets().add(getClass().getResource("/css/styles.css").toExternalForm());
+        scene.getStylesheets().add(Objects.requireNonNull(getClass().getResource("/css/styles.css")).toExternalForm());
 
         primaryStage.setTitle("Login");
         primaryStage.setScene(scene);

@@ -25,7 +25,7 @@
 
 
 /* Create Account Button (Secondary) */
-.secundaryButton {
+.secondaryButton {
     -fx-background-color: white;
     -fx-border-color: #2F96FD;
     -fx-text-fill: #2F96FD;
@@ -44,7 +44,7 @@
     -fx-background-color: #004DF4;
 }
 
-.secundaryButton:hover {
+.secondaryButton:hover {
     -fx-background-color: #E6F0FF;
     -fx-text-fill: #004DF4;
     -fx-border-color: #004DF4;

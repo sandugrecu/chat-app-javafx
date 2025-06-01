@@ -3,11 +3,11 @@ package com.sandugrecu.controllers;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 
 import com.sandugrecu.alertBoxes.AddContactAlert;
 import com.sandugrecu.client.ClientSocket;
-import com.sandugrecu.client.Config;
 import com.sandugrecu.alertBoxes.CustomAlert;
 import com.sandugrecu.client.Session;
 import javafx.event.ActionEvent;
@@ -26,8 +26,6 @@ public class ContactsController {
     private VBox contactsContainer;
 
     private String currentUsername;
-    private String serverIP = Config.getServerIP();
-
     public void setUsername(String username) {
         this.currentUsername = username;
         loadContactsFromServer();
@@ -35,11 +33,8 @@ public class ContactsController {
 
     private void loadContactsFromServer() {
         try {
-            contactsContainer.getChildren().clear();  
-        	
-            //ClientSocket clientSocket = new ClientSocket(serverIP, 12345);
+            contactsContainer.getChildren().clear();
             ClientSocket clientSocket = Session.getClientSocket();
-            //System.out.println("[DEBUG] ClientSocket: " + Session.getClientSocket());
 
             // Identify the client to the server
             clientSocket.sendUsername(currentUsername);
@@ -60,9 +55,8 @@ public class ContactsController {
                 }
             }
 
-            //clientSocket.close();
         } catch (Exception e) {
-            e.printStackTrace();
+            e.printStackTrace(System.err);
         }
     }
     
@@ -97,7 +91,7 @@ public class ContactsController {
             }
 
         } catch (Exception e) {
-            e.printStackTrace();
+            e.printStackTrace(System.err);
             new CustomAlert("Error occurred while adding contact.");
         }
     }
@@ -109,10 +103,9 @@ public class ContactsController {
             if (clientSocket != null) {
                 clientSocket.close(); // Close the old socket
             }
-            Session.setClientSocket(null);        // Clear client socket
-            Session.setCurrentUsername(null);     // Clear username
+            Session.clearSession();
         } catch (IOException e) {
-            e.printStackTrace();
+            e.printStackTrace(System.err);
         }
 
         try {
@@ -122,16 +115,15 @@ public class ContactsController {
             Stage currentStage = (Stage) ((javafx.scene.Node) event.getSource()).getScene().getWindow();
             
             Scene scene = new Scene(root);
-            scene.getStylesheets().add(getClass().getResource("/css/styles.css").toExternalForm());
+            scene.getStylesheets().add(Objects.requireNonNull(getClass().getResource("/css/styles.css")).toExternalForm());
             
             currentStage.setScene(scene);
             currentStage.setTitle("Login");
             currentStage.show();
         } catch (IOException e) {
-            e.printStackTrace();
+            e.printStackTrace(System.err);
         }
     }
-
 
     private void openChat(String contactUsername) {
         System.out.println("Opening chat with: " + contactUsername + " (ContactsController)");
@@ -168,14 +160,14 @@ public class ContactsController {
             Stage currentStage = (Stage) contactsContainer.getScene().getWindow();
             
             Scene scene = new Scene(chatPageRoot);
-            scene.getStylesheets().add(getClass().getResource("/css/styles.css").toExternalForm());
+            scene.getStylesheets().add(Objects.requireNonNull(getClass().getResource("/css/styles.css")).toExternalForm());
             
             currentStage.setScene(scene);
             currentStage.setTitle("Chat with " + contactUsername);
             currentStage.show();
 
         } catch (Exception e) {
-            e.printStackTrace();
+            e.printStackTrace(System.err);
         }
     }
   
