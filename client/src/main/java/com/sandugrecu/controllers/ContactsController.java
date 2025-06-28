@@ -14,17 +14,24 @@ import javafx.event.ActionEvent;
 import javafx.event.Event;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
+import javafx.geometry.Pos;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
+import javafx.scene.control.ContentDisplay;
+import javafx.scene.control.Label;
+import javafx.scene.layout.HBox;
+import javafx.scene.layout.Priority;
+import javafx.scene.layout.Region;
 import javafx.scene.layout.VBox;
+import javafx.scene.paint.Color;
+import javafx.scene.shape.Circle;
 import javafx.stage.Stage;
 
 public class ContactsController {
 
     @FXML
     private VBox contactsContainer;
-
     private String currentUsername;
     public void setUsername(String username) {
         this.currentUsername = username;
@@ -42,8 +49,41 @@ public class ContactsController {
             // Ask for the contact list
             clientSocket.sendCommand("GET_CONTACTS:" + currentUsername);
 
+            //funtie demo pentru adaugarea unui cerc care arata disponibilitatea unui contact
+            // deocamdata doar creaza la fiecare contact un cerc rosu
             String response;
             while (!(response = clientSocket.readLine()).equals("CONTACTS_DONE")) {
+                if (response.startsWith("CONTACT:")) {
+                    String contactName = response.substring("CONTACT:".length());
+
+                    // Creăm butonul cu numele contactului
+                    Button contactButton = new Button(contactName);
+                    contactButton.setMaxWidth(Double.MAX_VALUE);
+                    contactButton.getStyleClass().add("contact-button");
+                    contactButton.setOnAction(e -> openChat(contactName));
+
+                    // Creăm cercul roșu ca indicator de "offline"
+                    Circle statusIndicator = new Circle(5, Color.RED);
+                    statusIndicator.setTranslateX(5); // spațiu între text și cerc
+
+                    // Folosim un HBox pentru a pune numele + cercul în același rând
+                    HBox buttonContent = new HBox();
+                    buttonContent.setAlignment(Pos.CENTER_LEFT);
+                    Label nameLabel = new Label(contactName);
+                    Region spacer = new Region(); // spațiu între nume și cerc
+                    HBox.setHgrow(spacer, Priority.ALWAYS);
+
+                    buttonContent.getChildren().addAll(nameLabel, spacer, statusIndicator);
+                    contactButton.setGraphic(buttonContent);
+                    contactButton.setContentDisplay(ContentDisplay.GRAPHIC_ONLY);
+
+                    contactsContainer.getChildren().add(contactButton);
+                }
+            }
+
+
+            /*FUNTIA INITIALA BACKUP*/
+            /*while (!(response = clientSocket.readLine()).equals("CONTACTS_DONE")) {
                 if (response.startsWith("CONTACT:")) {
                     String contactName = response.substring("CONTACT:".length());
 
@@ -52,8 +92,8 @@ public class ContactsController {
                     contactButton.getStyleClass().add("contact-button");
                     contactButton.setOnAction(e -> openChat(contactName));
                     contactsContainer.getChildren().add(contactButton);
-                }
-            }
+                }*/
+
 
         } catch (Exception e) {
             e.printStackTrace(System.err);
